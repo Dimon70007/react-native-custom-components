@@ -24,6 +24,7 @@
  *
  */
 
+const buildStyleInterpolator = require('./buildStyleInterpolator');
 const Navigator = require('./Navigator');
 
 module.exports = {
