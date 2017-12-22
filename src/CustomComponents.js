@@ -24,9 +24,9 @@
  *
  */
 
-
 const Navigator = require('./Navigator');
 
 module.exports = {
-  Navigator,
+	buildStyleInterpolator,
+	Navigator,
 };
