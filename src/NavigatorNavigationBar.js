@@ -28,12 +28,7 @@
 var React = require('react');
 var NavigatorNavigationBarStylesAndroid = require('./NavigatorNavigationBarStylesAndroid');
 var NavigatorNavigationBarStylesIOS = require('./NavigatorNavigationBarStylesIOS');
-import {
-  Platform,
-  StyleSheet,
-  View,
-  ViewPropTypes,
-} from 'react-native';
+import { Platform, StyleSheet, View, ViewPropTypes } from 'react-native';
 var PropTypes = require('prop-types');
 
 var guid = require('./guid');
@@ -42,8 +37,9 @@ var { Map } = require('immutable');
 
 var COMPONENT_NAMES = ['Title', 'LeftButton', 'RightButton'];
 
-var NavigatorNavigationBarStyles = Platform.OS === 'android' ?
-  NavigatorNavigationBarStylesAndroid : NavigatorNavigationBarStylesIOS;
+var NavigatorNavigationBarStyles = Platform.OS === 'android'
+  ? NavigatorNavigationBarStylesAndroid
+  : NavigatorNavigationBarStylesIOS;
 
 var navStatePresentedIndex = function(navState) {
   if (navState.presentedIndex !== undefined) {
@@ -102,33 +98,37 @@ class NavigatorNavigationBar extends React.Component {
     });
   };
 
-  _getReusableProps = (/*string*/componentName, /*number*/index) => /*object*/ {
+  _getReusableProps = (/*string*/ componentName, /*number*/ index) => /*object*/ {
     var propStack = this._reusableProps[componentName];
     if (!propStack) {
       propStack = this._reusableProps[componentName] = [];
     }
     var props = propStack[index];
     if (!props) {
-      props = propStack[index] = {style:{}};
+      props = propStack[index] = { style: {} };
     }
     return props;
   };
 
   _updateIndexProgress = (
-    /*number*/progress,
-    /*number*/index,
-    /*number*/fromIndex,
-    /*number*/toIndex,
+    /*number*/ progress,
+    /*number*/ index,
+    /*number*/ fromIndex,
+    /*number*/ toIndex
   ) => {
-    var amount = toIndex > fromIndex ? progress : (1 - progress);
+    var amount = toIndex > fromIndex ? progress : 1 - progress;
     var oldDistToCenter = index - fromIndex;
     var newDistToCenter = index - toIndex;
     var interpolate;
-    if (oldDistToCenter > 0 && newDistToCenter === 0 ||
-        newDistToCenter > 0 && oldDistToCenter === 0) {
+    if (
+      (oldDistToCenter > 0 && newDistToCenter === 0) ||
+      (newDistToCenter > 0 && oldDistToCenter === 0)
+    ) {
       interpolate = this.props.navigationStyles.Interpolators.RightToCenter;
-    } else if (oldDistToCenter < 0 && newDistToCenter === 0 ||
-               newDistToCenter < 0 && oldDistToCenter === 0) {
+    } else if (
+      (oldDistToCenter < 0 && newDistToCenter === 0) ||
+      (newDistToCenter < 0 && oldDistToCenter === 0)
+    ) {
       interpolate = this.props.navigationStyles.Interpolators.CenterToLeft;
     } else if (oldDistToCenter === newDistToCenter) {
       interpolate = this.props.navigationStyles.Interpolators.RightToCenter;
@@ -136,7 +136,7 @@ class NavigatorNavigationBar extends React.Component {
       interpolate = this.props.navigationStyles.Interpolators.RightToLeft;
     }
 
-    COMPONENT_NAMES.forEach(function (componentName) {
+    COMPONENT_NAMES.forEach(function(componentName) {
       var component = this._components[componentName].get(this.props.navState.routeStack[index]);
       var props = this._getReusableProps(componentName, index);
       if (component && interpolate[componentName](props.style, amount)) {
@@ -146,7 +146,7 @@ class NavigatorNavigationBar extends React.Component {
     }, this);
   };
 
-  updateProgress = (/*number*/progress, /*number*/fromIndex, /*number*/toIndex) => {
+  updateProgress = (/*number*/ progress, /*number*/ fromIndex, /*number*/ toIndex) => {
     var max = Math.max(fromIndex, toIndex);
     var min = Math.min(fromIndex, toIndex);
     for (var index = min; index <= max; index++) {
@@ -160,21 +160,17 @@ class NavigatorNavigationBar extends React.Component {
     };
     var navState = this.props.navState;
     var components = navState.routeStack.map((route, index) =>
-      COMPONENT_NAMES.map(componentName =>
-        this._getComponent(componentName, route, index)
-      )
+      COMPONENT_NAMES.map(componentName => this._getComponent(componentName, route, index))
     );
 
     return (
-      <View
-        key={this._key}
-        style={[styles.navBarContainer, navBarStyle, this.props.style]}>
+      <View key={this._key} style={[styles.navBarContainer, navBarStyle, this.props.style]}>
         {components}
       </View>
     );
   }
 
-  _getComponent = (/*string*/componentName, /*object*/route, /*number*/index) => /*?Object*/ {
+  _getComponent = (/*string*/ componentName, /*object*/ route, /*number*/ index) => /*?Object*/ {
     if (this._descriptors[componentName].includes(route)) {
       return this._descriptors[componentName].get(route);
     }
@@ -192,12 +188,13 @@ class NavigatorNavigationBar extends React.Component {
     }
 
     var componentIsActive = index === navStatePresentedIndex(this.props.navState);
-    var initialStage = componentIsActive ?
-      this.props.navigationStyles.Stages.Center :
-      this.props.navigationStyles.Stages.Left;
+    var initialStage = componentIsActive
+      ? this.props.navigationStyles.Stages.Center
+      : this.props.navigationStyles.Stages.Left;
     rendered = (
       <View
-        ref={(ref) => {
+        key={this._key + '_' + componentName + '_' + index}
+        ref={ref => {
           this._components[componentName] = this._components[componentName].set(route, ref);
         }}
         pointerEvents={componentIsActive ? 'box-none' : 'none'}
@@ -210,7 +207,6 @@ class NavigatorNavigationBar extends React.Component {
     return rendered;
   };
 }
-
 
 var styles = StyleSheet.create({
   navBarContainer: {
