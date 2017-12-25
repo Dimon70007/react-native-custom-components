@@ -93,7 +93,6 @@ var Stages = {
   },
 };
 
-
 var opacityRatio = 100;
 
 function buildSceneInterpolators(startStyles, endStyles) {
@@ -162,13 +161,7 @@ var Interpolators = {
   RightToLeft: buildSceneInterpolators(Stages.Right, Stages.Left),
 };
 
-
 module.exports = {
-  General: {
-    NavBarHeight: NAV_BAR_HEIGHT,
-    StatusBarHeight: 0,
-    TotalNavHeight: NAV_BAR_HEIGHT,
-  },
   Interpolators,
   Stages,
 };

@@ -41,7 +41,6 @@ import {
 var AnimationsDebugModule = NativeModules.AnimationsDebugModule;
 var InteractionMixin = require('./InteractionMixin');
 var NavigationContext = require('./NavigationContext');
-var NavigatorBreadcrumbNavigationBar = require('./NavigatorBreadcrumbNavigationBar');
 var NavigatorNavigationBar = require('./NavigatorNavigationBar');
 var NavigatorSceneConfigs = require('./NavigatorSceneConfigs');
 var React = require('react');
@@ -270,11 +269,6 @@ var GESTURE_ACTIONS = ['pop', 'jumpBack', 'jumpForward'];
  * This sets up a left navigator bar button that's visible on scenes after the
  * the first one. When the button is tapped the navigator is popped.
  *
- * Another type of navigation bar, with breadcrumbs, is provided by
- * `Navigator.BreadcrumbNavigationBar`. You can also provide your own navigation
- * bar by passing it through the `navigationBar` prop. See the
- * [UIExplorer](https://github.com/facebook/react-native/tree/master/Examples/UIExplorer)
- * demo to try out both built-in navigation bars out and see how to use them.
  *
  * ### Scene Transitions
  *
@@ -391,7 +385,6 @@ var Navigator = createReactClass({
   },
 
   statics: {
-    BreadcrumbNavigationBar: NavigatorBreadcrumbNavigationBar,
     NavigationBar: NavigatorNavigationBar,
     SceneConfigs: NavigatorSceneConfigs,
   },
@@ -1377,6 +1370,7 @@ var Navigator = createReactClass({
     this._renderedSceneMap = newRenderedSceneMap;
     return (
       <View style={[styles.container, this.props.style]}>
+        {this._renderNavigationBar()}
         <View
           style={styles.transitioner}
           {...this.panGesture.panHandlers}
@@ -1384,7 +1378,6 @@ var Navigator = createReactClass({
           onResponderTerminationRequest={this._handleResponderTerminationRequest}>
           {scenes}
         </View>
-        {this._renderNavigationBar()}
       </View>
     );
   },

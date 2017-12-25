@@ -25,48 +25,39 @@
  */
 'use strict';
 
-import {
-  Dimensions,
-  I18nManager,
-  PixelRatio,
-} from 'react-native';
+import { Dimensions, I18nManager, PixelRatio } from 'react-native';
 
 var buildStyleInterpolator = require('./buildStyleInterpolator');
 var merge = require('./merge');
 
 var SCREEN_WIDTH = Dimensions.get('window').width;
-var NAV_BAR_HEIGHT = 44;
-var STATUS_BAR_HEIGHT = 20;
-var NAV_HEIGHT = NAV_BAR_HEIGHT + STATUS_BAR_HEIGHT;
 
 var BASE_STYLES = {
   Title: {
-    position: 'absolute',
-    top: STATUS_BAR_HEIGHT,
-    left: 0,
-    right: 0,
     alignItems: 'center',
-    height: NAV_BAR_HEIGHT,
     backgroundColor: 'transparent',
+    left: 0,
+    position: 'absolute',
+    right: 0,
   },
   LeftButton: {
-    position: 'absolute',
-    top: STATUS_BAR_HEIGHT,
-    left: 0,
-    overflow: 'hidden',
-    opacity: 1,
-    height: NAV_BAR_HEIGHT,
+    alignItems: 'center',
     backgroundColor: 'transparent',
+    bottom: 0,
+    flexDirection: 'row',
+    left: 0,
+    opacity: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    top: 0,
   },
   RightButton: {
-    position: 'absolute',
-    top: STATUS_BAR_HEIGHT,
-    right: 0,
-    overflow: 'hidden',
-    opacity: 1,
     alignItems: 'flex-end',
-    height: NAV_BAR_HEIGHT,
     backgroundColor: 'transparent',
+    opacity: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    right: 0,
   },
 };
 
@@ -94,7 +85,6 @@ var Stages = {
     RightButton: merge(BASE_STYLES.RightButton, { opacity: 0 }),
   },
 };
-
 
 var opacityRatio = 100;
 
@@ -164,13 +154,7 @@ var Interpolators = {
   RightToLeft: buildSceneInterpolators(Stages.Right, Stages.Left),
 };
 
-
 module.exports = {
-  General: {
-    NavBarHeight: NAV_BAR_HEIGHT,
-    StatusBarHeight: STATUS_BAR_HEIGHT,
-    TotalNavHeight: NAV_HEIGHT,
-  },
   Interpolators,
   Stages,
 };

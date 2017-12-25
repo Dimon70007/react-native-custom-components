@@ -155,16 +155,13 @@ class NavigatorNavigationBar extends React.Component {
   };
 
   render() {
-    var navBarStyle = {
-      height: this.props.navigationStyles.General.TotalNavHeight,
-    };
     var navState = this.props.navState;
     var components = navState.routeStack.map((route, index) =>
       COMPONENT_NAMES.map(componentName => this._getComponent(componentName, route, index))
     );
 
     return (
-      <View key={this._key} style={[styles.navBarContainer, navBarStyle, this.props.style]}>
+      <View key={this._key} style={[styles.navBarContainer, this.props.style]}>
         {components}
       </View>
     );
@@ -210,11 +207,9 @@ class NavigatorNavigationBar extends React.Component {
 
 var styles = StyleSheet.create({
   navBarContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
     backgroundColor: 'transparent',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 
