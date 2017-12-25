@@ -208,8 +208,6 @@ class NavigatorNavigationBar extends React.Component {
 var styles = StyleSheet.create({
   navBarContainer: {
     backgroundColor: 'transparent',
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 });
 

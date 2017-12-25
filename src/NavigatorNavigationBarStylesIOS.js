@@ -25,7 +25,7 @@
  */
 'use strict';
 
-import { Dimensions, I18nManager, PixelRatio } from 'react-native';
+import { Dimensions } from 'react-native';
 
 var buildStyleInterpolator = require('./buildStyleInterpolator');
 var merge = require('./merge');
@@ -43,13 +43,11 @@ var BASE_STYLES = {
   LeftButton: {
     alignItems: 'center',
     backgroundColor: 'transparent',
-    bottom: 0,
     flexDirection: 'row',
     left: 0,
     opacity: 1,
     overflow: 'hidden',
     position: 'absolute',
-    top: 0,
   },
   RightButton: {
     alignItems: 'flex-end',

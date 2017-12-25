@@ -365,6 +365,18 @@ var Navigator = createReactClass({
     onDidFocus: PropTypes.func,
 
     /**
+     * Pass in a function to get notified with the target route when
+     * the navigator component is mounted and before each navigator transition.
+     */
+    onDidBlur: PropTypes.func,
+
+    /**
+     * Will be called with the new route of each scene after the transition is
+     * complete or after the initial mounting.
+     */
+    onWillBlur: PropTypes.func,
+
+    /**
      * Use this to provide an optional component representing a navigation bar
      * that is persisted across scene transitions. This component will receive
      * two props: `navigator` and `navState` representing the navigator
@@ -492,6 +504,8 @@ var Navigator = createReactClass({
    * re-renders the navigation bar and the stack items.
    */
   immediatelyResetRouteStack: function(nextRouteStack) {
+    var presentedRoute = this.state.routeStack[this.state.presentedIndex];
+    this._emitWillBlur(presentedRoute);
     var destIndex = nextRouteStack.length - 1;
     this._emitWillFocus(nextRouteStack[destIndex]);
     this.setState(
@@ -511,6 +525,7 @@ var Navigator = createReactClass({
         if (navBar && navBar.immediatelyRefresh) {
           navBar.immediatelyRefresh();
         }
+        this._emitDidBlur(presentedRoute);
         this._emitDidFocus(this.state.routeStack[this.state.presentedIndex]);
       }
     );
@@ -603,7 +618,10 @@ var Navigator = createReactClass({
     if (AnimationsDebugModule) {
       AnimationsDebugModule.stopRecordingFps(Date.now());
     }
+
+    this._emitDidBlur();
     this.state.transitionFromIndex = null;
+
     this.spring.setCurrentValue(0).setAtRest();
     this._hideScenes();
     if (this.state.transitionCb) {
@@ -629,6 +647,7 @@ var Navigator = createReactClass({
     if (this.state.transitionQueue.length) {
       var queuedTransition = this.state.transitionQueue.shift();
       this._enableScene(queuedTransition.destIndex);
+      this._emitWillBlur();
       this._emitWillFocus(this.state.routeStack[queuedTransition.destIndex]);
       this._transitionTo(
         queuedTransition.destIndex,
@@ -639,8 +658,34 @@ var Navigator = createReactClass({
     }
   },
 
+  _emitDidBlur: function(route) {
+    if (!route) {
+      route = this.state.routeStack[this.state.transitionFromIndex];
+    }
+    this.navigationContext.emit('didblur', { route });
+
+    if (this.props.onDidBlur) {
+      this.props.onDidBlur(route);
+    }
+  },
+
+  _emitWillBlur: function(route) {
+    if (!route) {
+      route = this.state.routeStack[this.state.presentedIndex];
+    }
+    this.navigationContext.emit('willblur', { route });
+
+    var navBar = this._navBar;
+    if (navBar && navBar.handleWillBlur) {
+      navBar.handleWillBlur(route);
+    }
+    if (this.props.onWillBlur) {
+      this.props.onWillBlur(route);
+    }
+  },
+
   _emitDidFocus: function(route) {
-    this.navigationContext.emit('didfocus', { route: route });
+    this.navigationContext.emit('didfocus', { route });
 
     if (this.props.onDidFocus) {
       this.props.onDidFocus(route);
@@ -648,7 +693,7 @@ var Navigator = createReactClass({
   },
 
   _emitWillFocus: function(route) {
-    this.navigationContext.emit('willfocus', { route: route });
+    this.navigationContext.emit('willfocus', { route });
 
     var navBar = this._navBar;
     if (navBar && navBar.handleWillFocus) {
@@ -844,6 +889,7 @@ var Navigator = createReactClass({
       }
     } else {
       // The gesture has enough velocity to complete, so we transition to the gesture's destination
+      this._emitWillBlur();
       this._emitWillFocus(this.state.routeStack[destIndex]);
       this._transitionTo(destIndex, transitionVelocity, null, () => {
         if (releaseGestureAction === 'pop') {
@@ -1042,6 +1088,7 @@ var Navigator = createReactClass({
   _jumpN: function(n) {
     var destIndex = this._getDestIndexWithinBounds(n);
     this._enableScene(destIndex);
+    this._emitWillBlur();
     this._emitWillFocus(this.state.routeStack[destIndex]);
     this._transitionTo(destIndex);
   },
@@ -1085,6 +1132,7 @@ var Navigator = createReactClass({
     var destIndex = nextStack.length - 1;
     var nextSceneConfig = this.props.configureScene(route, nextStack);
     var nextAnimationConfigStack = activeAnimationConfigStack.concat([nextSceneConfig]);
+    this._emitWillBlur();
     this._emitWillFocus(nextStack[destIndex]);
     this.setState(
       {
@@ -1109,14 +1157,15 @@ var Navigator = createReactClass({
     if (n <= 0 || this.state.presentedIndex - n < 0) {
       return;
     }
-    var popIndex = this.state.presentedIndex - n;
     var presentedRoute = this.state.routeStack[this.state.presentedIndex];
+    var popIndex = this.state.presentedIndex - n;
     var popSceneConfig = this.props.configureScene(presentedRoute); // using the scene config of the currently presented view
     this._enableScene(popIndex);
     // This is needed because scene at the pop index may be transformed
     // with a configuration different from the configuration on the presented
     // route.
     this._clearTransformations(popIndex);
+    this._emitWillBlur(presentedRoute);
     this._emitWillFocus(this.state.routeStack[popIndex]);
     this._transitionTo(
       popIndex,
@@ -1162,12 +1211,14 @@ var Navigator = createReactClass({
       return;
     }
 
+    var presentedRoute = this.state.routeStack[this.state.presentedIndex];
     var nextRouteStack = this.state.routeStack.slice();
     var nextAnimationModeStack = this.state.sceneConfigStack.slice();
     nextRouteStack[index] = route;
     nextAnimationModeStack[index] = this.props.configureScene(route, nextRouteStack);
 
     if (index === this.state.presentedIndex) {
+      this._emitWillBlur(presentedRoute);
       this._emitWillFocus(route);
     }
     this.setState(
@@ -1177,6 +1228,7 @@ var Navigator = createReactClass({
       },
       () => {
         if (index === this.state.presentedIndex) {
+          this._emitDidBlur(presentedRoute);
           this._emitDidFocus(route);
         }
         cb && cb();
@@ -1198,6 +1250,7 @@ var Navigator = createReactClass({
     const nextAnimationConfigStack = animationConfigFromSceneConfigStack.concat([nextSceneConfig]);
 
     const newStack = currentRouteStack.slice(0, currentLength - 1).concat([route]);
+    this._emitWillBlur();
     this._emitWillFocus(nextStack[destIndex]);
     this.setState(
       {
